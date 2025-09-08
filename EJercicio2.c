@@ -23,11 +23,18 @@ static inline void intercambiar(int *a, int *b) {
 
 /* Devuelve el promedio (double) de arr[bajo..alto] */
 double calcular_promedio_segmento(int arr[], int bajo, int alto) {
-    // Escribe aquí tu función
-    // Pista:
-    //   - Acumula en (long long) o (double) para evitar overflow
-    //   - Devuelve suma / cantidad como double
-    return 0.0; // placeholder
+  if (bajo > alto) return 0.0; // placeholder
+  // Escribe aquí tu función
+  // Pista:
+  //   - Acumula en (long long) o (double) para evitar overflow
+  //   - Devuelve suma / cantidad como double
+  long long suma = 0;
+  int n = alto - bajo + 1;
+  for (int i = bajo; i <= alto; i++){
+    suma = suma + arr[i];
+  }
+  return (double)suma/n;
+  
 }
 
 /*
@@ -47,7 +54,14 @@ int particion_por_promedio(int arr[], int bajo, int alto, double pivote) {
     // Escribe aquí tu función
     // Puedes implementar un esquema tipo Hoare o Lomuto pero guiado por pivot double.
     // Recuerda: NO escribas 'pivote' dentro del arreglo; solo compáralo contra arr[i].
-    return -1; // placeholder
+    int i = bajo - 1;
+    for(int j = bajo; j <= alto; j++){
+      if (arr[j] < pivote){
+        i++;
+        intercambiar(&arr[i], &arr[j]);
+      }
+    }
+    return i + 1; // placeholder
 }
 
 /*
@@ -59,7 +73,30 @@ int particion_por_promedio(int arr[], int bajo, int alto, double pivote) {
         3) Llamar recursivamente a los segmentos definidos por k
 */
 void quicksort_promedio(int arr[], int bajo, int alto) {
-    // Escribe aquí tu función
+  // Escribe aquí tu función
+  if (bajo >= alto) return;
+  double pivote = calcular_promedio_segmento(arr, bajo, alto);
+  int k = particion_por_promedio(arr, bajo, alto, pivote);
+
+  //Me fui a bucle infinito :(, entonces:
+  // Si k == bajo, todos los elementos son >= promedio
+  if (k == bajo) {
+    // Solo procesamos el segmento derecho si es mas pequeño que el original
+    if (k < alto) {
+      quicksort_promedio(arr, k + 1, alto);
+    }
+    return; // Salimos para evitar procesar segmento izquierdo vacio
+  }
+    
+  // Segmento izquierdo: elementos < pivote
+  if (k > bajo) {
+    quicksort_promedio(arr, bajo, k - 1);
+  }
+    
+  // Segmento derecho: elementos >= pivote
+  if (k <= alto) {
+    quicksort_promedio(arr, k, alto);
+  }
 }
 
 /* Utilidad para imprimir un arreglo */
@@ -73,6 +110,7 @@ void imprimir_arreglo(int arr[], int n) {
 
 int main(void) {
     int n;
+    printf("Numero de elementos: ");
     if (scanf("%d", &n) != 1 || n <= 0) {
         fprintf(stderr, "Error: n inválido.\n");
         return 1;
@@ -83,7 +121,7 @@ int main(void) {
         fprintf(stderr, "Error: memoria insuficiente.\n");
         return 1;
     }
-
+    printf("Ingresa elementos: ");
     for (int i = 0; i < n; i++) {
         if (scanf("%d", &arr[i]) != 1) {
             fprintf(stderr, "Error: entrada inválida en la posición %d.\n", i + 1);
@@ -93,12 +131,12 @@ int main(void) {
     }
 
     // Antes
-    // printf("Antes:  "); imprimir_arreglo(arr, n);
+    printf("Antes:  "); imprimir_arreglo(arr, n);
 
     quicksort_promedio(arr, 0, n - 1);
 
     // Después
-    imprimir_arreglo(arr, n);
+    printf("Despues:  "); imprimir_arreglo(arr, n);
 
     free(arr);
     return 0;
